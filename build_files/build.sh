@@ -1,24 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -ouex pipefail
+echo "=== EC-Fan-Control für Bosgame M5 wird installiert ==="
 
-### Install packages
+dnf install -y git make gcc kernel-devel kernel-headers
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+git clone https://github.com/cmetz/ec-su_axb35-linux.git /tmp/ec-driver
+cd /tmp/ec-driver
+make
 
-# this installs a package from fedora repos
-dnf5 install -y tmux 
+mkdir -p /usr/lib/modules/$(uname -r)/extra
+cp ec_su_axb35.ko /usr/lib/modules/$(uname -r)/extra/
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+echo "ec_su_axb35" > /etc/modules-load.d/ec-su_axb35.conf
 
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+rm -rf /tmp/ec-driver
+echo "=== EC-Treiber erfolgreich integriert ==="
